@@ -12,7 +12,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../components/palette.dart';
 import '../components/paper.dart';
-import '../components/icon_pallete.dart';
+import '../components/image_pallete.dart';
 import '../models/strokes_model.dart';
 
 class PaperScreen extends StatefulWidget {
@@ -140,7 +140,7 @@ class _PaperScreenState extends State<PaperScreen> {
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Palette(),
+              // Palette(),
               IconPalette(),
             ],
           )

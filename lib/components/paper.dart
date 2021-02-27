@@ -1,4 +1,5 @@
 import 'dart:ui' as ui;
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -6,7 +7,19 @@ import 'package:provider/provider.dart';
 
 import '../models/pen_model.dart';
 import '../models/strokes_model.dart';
-import '../models/icon_model.dart';
+import '../models/image_model.dart';
+
+class HexColor extends Color {
+  static int _getColorFromHex(String hexColor) {
+    hexColor = hexColor.toUpperCase().replaceAll('#', '');
+    if (hexColor.length == 6) {
+      hexColor = 'FF' + hexColor;
+    }
+    return int.parse(hexColor, radix: 16);
+  }
+
+  HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
+}
 
 class Paper extends StatefulWidget {
   final image;
@@ -20,15 +33,16 @@ class Paper extends StatefulWidget {
 
 class _PaperState extends State<Paper> {
   final GlobalKey _keyPaper = GlobalKey();
-  Offset _offset = Offset(10, 10);
-  double _radians = 0.0;
+  Offset _offset = Offset(200, 200);
+  Offset _rotateCircleOffset = Offset(0, 0);
+  Offset _scaleCircleOffset = Offset(0, 0);
   double _scale = 1.0;
+  double _theta = 0.0;
+  double _distance = 0;
 
   @override
   Widget build(BuildContext context) {
-    // final pen = Provider.of<PenModel>(context);
-    // final strokes = Provider.of<StrokesModel>(context);
-    // final iconProv = Provider.of<IconModel>(context);
+    final imageProv = Provider.of<ImageModel>(context);
     return
         // return Listener(
         //   // onPointerDownは画面に指が触れた時にコールされる
@@ -74,51 +88,100 @@ class _PaperState extends State<Paper> {
           left: _offset.dx,
           top: _offset.dy,
           child: GestureDetector(
-            onPanUpdate: (DragUpdateDetails details) {
+            onPanUpdate: (DragUpdateDetails transformDetails) {
               setState(() {
-                _offset = Offset(_offset.dx + details.delta.dx,
-                    _offset.dy + details.delta.dy);
+                _offset = Offset(_offset.dx + transformDetails.delta.dx,
+                    _offset.dy + transformDetails.delta.dy);
               });
             },
-            child: Container(
-              color: Colors.green,
-              width: 100,
-              height: 100,
-              child: Center(
-                child: Text(
-                    'Pan\nx:${_offset.dx.toInt()}\ny:${_offset.dy.toInt()}'),
+            child: FittedBox(
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: Stack(
+                  children: [
+                    Transform.rotate(
+                      angle: _theta,
+                      child: Transform.scale(
+                        scale: _scale,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.black,
+                              width: 3,
+                            ),
+                          ),
+                          child: Center(
+                            child: Image.asset(imageProv.image),
+                          ),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onPanUpdate: (DragUpdateDetails rotateDetails) {
+                        setState(() {
+                          _theta = math.atan(rotateDetails.localPosition.dy /
+                              (rotateDetails.localPosition.dx));
+                          _rotateCircleOffset = Offset(
+                              rotateDetails.globalPosition.dx,
+                              rotateDetails.globalPosition.dy);
+                          // _offset = Offset(rotateDetails.localPosition.dx,
+                          //     rotateDetails.localPosition.dy);
+                        });
+                      },
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.white,
+                              width: 3,
+                            ),
+                            shape: BoxShape.circle,
+                            // color: Color(0xFFe0f2f1),
+                          ),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onPanUpdate: (DragUpdateDetails scaleDetails) {
+                        setState(() {
+                          _distance = math.sqrt(
+                              math.pow(scaleDetails.localPosition.dx, 2) +
+                                  math.pow(scaleDetails.localPosition.dy, 2));
+                          _scale = _distance / 200;
+                          _scaleCircleOffset = Offset(
+                              scaleDetails.globalPosition.dx,
+                              scaleDetails.globalPosition.dy);
+                          // _offset = Offset(scaleDetails.localPosition.dx,
+                          //     scaleDetails.localPosition.dy);
+                        });
+                      },
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: Container(
+                          child: Container(
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: HexColor('ffaec0'),
+                                width: 3,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-        Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                  onScaleUpdate: (ScaleUpdateDetails details) {
-                    setState(() {
-                      _radians = details.rotation;
-                      _scale = details.scale;
-                    });
-                  },
-                  child: Transform.rotate(
-                    angle: _radians,
-                    child: Transform.scale(
-                      scale: _scale,
-                      child: Container(
-                        height: 300,
-                        width: 300,
-                        color: Colors.amber,
-                        child: Center(
-                          child: Text('rotation:\n$_radians\nscale:\n$_scale'),
-                        ),
-                      ),
-                    ),
-                  ))
-            ],
-          ),
-        )
       ],
     );
   }

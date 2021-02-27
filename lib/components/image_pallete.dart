@@ -2,43 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
-import '../models/icon_model.dart';
+import '../models/image_model.dart';
 import '../models/pen_model.dart';
 
 class IconPalette extends StatelessWidget {
-  static const icons = [
-    Icons.add,
-    Icons.accessibility,
-    Icons.ac_unit,
-    Icons.access_alarm,
-    Icons.exit_to_app,
-    Icons.wallet_giftcard,
-    Icons.east,
-    Icons.qr_code,
-    Icons.label,
-    Icons.eco,
-    Icons.pages,
-    Icons.book,
+  static const images = [
+    'images/sunglass.png',
+    'images/arlong.png',
+    'images/buggy.png',
+    'images/croco.png',
+    'images/enel.png',
+    'images/lucci.png',
+    'images/luffy.png',
+    'images/mask.png',
+    'images/nami.png',
+    'images/taisyo.png',
+    'images/zoro.png',
   ];
 
   @override
   Widget build(BuildContext context) {
-    final iconProv = Provider.of<IconModel>(context);
+    final iconProv = Provider.of<ImageModel>(context);
     final pen = Provider.of<PenModel>(context);
     return Container(
       height: 50,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: icons.length,
+        itemCount: images.length,
         itemBuilder: (context, index) {
-          final i = icons[index];
+          final i = images[index];
           return GestureDetector(
             onTap: () {
-              iconProv.icon = i;
+              iconProv.image = i;
             },
-            child: iconContainer(
+            child: imageContainer(
               i,
-              i == iconProv.icon,
+              i == iconProv.image,
               pen.color,
             ),
           );
@@ -47,7 +46,7 @@ class IconPalette extends StatelessWidget {
     );
   }
 
-  Widget iconContainer(var icon, bool selected, Color color) {
+  Widget imageContainer(var image, bool selected, Color color) {
     return Container(
       height: 50,
       width: 45,
@@ -57,11 +56,7 @@ class IconPalette extends StatelessWidget {
           child: CircleAvatar(
             backgroundColor: Colors.blue[200],
             radius: 30,
-            child: Icon(
-              icon,
-              size: 36,
-              color: color,
-            ),
+            child: Image.asset(image),
           ),
           padding: selected ? EdgeInsets.all(2.0) : EdgeInsets.all(0),
           decoration: new BoxDecoration(

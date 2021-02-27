@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import './models/icon_model.dart';
+import 'models/image_model.dart';
 import './models/strokes_model.dart';
 import './screens/index_screen.dart';
 import './screens/paper_screen.dart';
@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
           create: (BuildContext context) => StrokesModel(),
         ),
         ChangeNotifierProvider(
-          create: (BuildContext context) => IconModel(),
+          create: (BuildContext context) => ImageModel(),
         )
       ],
       child: MaterialApp(

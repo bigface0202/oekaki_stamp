@@ -3,15 +3,15 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import './pen_model.dart';
-import './icon_model.dart';
+import 'image_model.dart';
 
 class StrokesModel extends ChangeNotifier {
   List<Stroke> _strokes = [];
 
   get all => _strokes;
 
-  void add(PenModel pen, Offset offset, IconModel iconProv) {
-    _strokes.add(Stroke(pen.color, iconProv.icon)..add(offset));
+  void add(PenModel pen, Offset offset, ImageModel iconProv) {
+    _strokes.add(Stroke(pen.color, iconProv.image)..add(offset));
     notifyListeners();
   }
 
