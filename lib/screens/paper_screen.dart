@@ -5,12 +5,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+import 'package:oekaki_stamp/models/paste_image_model.dart';
 import 'package:provider/provider.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import '../components/palette.dart';
 import '../components/paper.dart';
 import '../components/image_pallete.dart';
 import '../models/strokes_model.dart';
@@ -92,6 +91,7 @@ class _PaperScreenState extends State<PaperScreen> {
   Widget build(BuildContext context) {
     final image = ModalRoute.of(context).settings.arguments as ui.Image;
     final strokes = Provider.of<StrokesModel>(context);
+    final pasteImageProv = Provider.of<PasteImageModel>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -164,7 +164,7 @@ class _PaperScreenState extends State<PaperScreen> {
                   FlatButton(
                     child: Text('OK'),
                     onPressed: () {
-                      strokes.clear();
+                      pasteImageProv.clear();
                       Navigator.of(context).pop();
                     },
                   ),

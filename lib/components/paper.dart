@@ -1,11 +1,15 @@
+import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 import '../models/pen_model.dart';
+import '../models/paste_image_model.dart';
 import '../models/strokes_model.dart';
 import '../models/image_model.dart';
 
@@ -34,6 +38,7 @@ class Paper extends StatefulWidget {
 class _PaperState extends State<Paper> {
   final GlobalKey _keyPaper = GlobalKey();
   Offset _offset = Offset(200, 200);
+  Offset _globalOffset = Offset(0, 0);
   Offset _rotateCircleOffset = Offset(0, 0);
   Offset _scaleCircleOffset = Offset(0, 0);
   double _scale = 1.0;
@@ -43,6 +48,7 @@ class _PaperState extends State<Paper> {
   @override
   Widget build(BuildContext context) {
     final imageProv = Provider.of<ImageModel>(context);
+    final pasteImageProv = Provider.of<PasteImageModel>(context);
     return
         // return Listener(
         //   // onPointerDownは画面に指が触れた時にコールされる
@@ -77,6 +83,19 @@ class _PaperState extends State<Paper> {
             ),
           ),
         ),
+        FittedBox(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: CustomPaint(
+              key: _keyPaper,
+              painter: _StampPainter(pasteImageProv),
+              child: ConstrainedBox(
+                constraints: BoxConstraints.expand(),
+              ),
+            ),
+          ),
+        ),
         // CustomPaint(
         //   key: _keyPaper,
         //   painter: _Painter(strokes),
@@ -89,94 +108,105 @@ class _PaperState extends State<Paper> {
           top: _offset.dy,
           child: GestureDetector(
             onPanUpdate: (DragUpdateDetails transformDetails) {
+              final RenderBox box = _keyPaper.currentContext.findRenderObject();
               setState(() {
                 _offset = Offset(_offset.dx + transformDetails.delta.dx,
                     _offset.dy + transformDetails.delta.dy);
+                Offset localPaper =
+                    box.globalToLocal(transformDetails.globalPosition);
+                _globalOffset = Offset(localPaper.dx, localPaper.dy);
               });
             },
             child: FittedBox(
               child: SizedBox(
-                width: 100,
-                height: 100,
-                child: Stack(
-                  children: [
-                    Transform.rotate(
-                      angle: _theta,
-                      child: Transform.scale(
-                        scale: _scale,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.black,
-                              width: 3,
+                width: 100 * _scale,
+                height: 100 * _scale,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.grey,
+                      width: 3,
+                    ),
+                  ),
+                  child: Stack(
+                    children: [
+                      Transform.rotate(
+                        angle: _theta,
+                        child: Transform.scale(
+                          scale: _scale,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.black,
+                                width: 3,
+                              ),
                             ),
-                          ),
-                          child: Center(
-                            child: Image.asset(imageProv.image),
+                            child: Center(
+                              child: Image.asset(imageProv.image),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    GestureDetector(
-                      onPanUpdate: (DragUpdateDetails rotateDetails) {
-                        setState(() {
-                          _theta = math.atan(rotateDetails.localPosition.dy /
-                              (rotateDetails.localPosition.dx));
-                          _rotateCircleOffset = Offset(
-                              rotateDetails.globalPosition.dx,
-                              rotateDetails.globalPosition.dy);
-                          // _offset = Offset(rotateDetails.localPosition.dx,
-                          //     rotateDetails.localPosition.dy);
-                        });
-                      },
-                      child: Align(
-                        alignment: Alignment.bottomRight,
-                        child: Container(
-                          width: 30,
-                          height: 30,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 3,
-                            ),
-                            shape: BoxShape.circle,
-                            // color: Color(0xFFe0f2f1),
-                          ),
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onPanUpdate: (DragUpdateDetails scaleDetails) {
-                        setState(() {
-                          _distance = math.sqrt(
-                              math.pow(scaleDetails.localPosition.dx, 2) +
-                                  math.pow(scaleDetails.localPosition.dy, 2));
-                          _scale = _distance / 200;
-                          _scaleCircleOffset = Offset(
-                              scaleDetails.globalPosition.dx,
-                              scaleDetails.globalPosition.dy);
-                          // _offset = Offset(scaleDetails.localPosition.dx,
-                          //     scaleDetails.localPosition.dy);
-                        });
-                      },
-                      child: Align(
-                        alignment: Alignment.topRight,
-                        child: Container(
+                      GestureDetector(
+                        onPanUpdate: (DragUpdateDetails rotateDetails) {
+                          setState(() {
+                            _theta = math.atan(rotateDetails.localPosition.dy /
+                                (rotateDetails.localPosition.dx));
+                            _rotateCircleOffset = Offset(
+                                rotateDetails.globalPosition.dx,
+                                rotateDetails.globalPosition.dy);
+                            // _offset = Offset(rotateDetails.localPosition.dx,
+                            //     rotateDetails.localPosition.dy);
+                          });
+                        },
+                        child: Align(
+                          alignment: Alignment.bottomRight,
                           child: Container(
                             width: 30,
                             height: 30,
                             decoration: BoxDecoration(
-                              shape: BoxShape.circle,
                               border: Border.all(
-                                color: HexColor('ffaec0'),
+                                color: Colors.white,
                                 width: 3,
                               ),
+                              shape: BoxShape.circle,
+                              // color: Color(0xFFe0f2f1),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                      GestureDetector(
+                        onPanUpdate: (DragUpdateDetails scaleDetails) {
+                          setState(() {
+                            _distance = math.sqrt(
+                                math.pow(scaleDetails.localPosition.dx, 2) +
+                                    math.pow(scaleDetails.localPosition.dy, 2));
+                            _scale = _distance / 100;
+                            _scaleCircleOffset = Offset(
+                                scaleDetails.globalPosition.dx,
+                                scaleDetails.globalPosition.dy);
+                            // _offset = Offset(scaleDetails.localPosition.dx,
+                            //     scaleDetails.localPosition.dy);
+                          });
+                        },
+                        child: Align(
+                            alignment: Alignment.topRight,
+                            child: Icon(Icons.add)),
+                      ),
+                      Align(
+                        alignment: Alignment.bottomLeft,
+                        child: IconButton(
+                          iconSize: 30,
+                          icon: Icon(Icons.content_paste_outlined),
+                          color: Colors.black,
+                          onPressed: () async {
+                            await pasteImageProv.addPasteImage(
+                                imageProv.image, _scale, _theta, _globalOffset);
+                          },
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -202,6 +232,54 @@ class _ImagePainter extends CustomPainter {
     return false;
   }
 }
+
+class _StampPainter extends CustomPainter {
+  final PasteImageModel _pasteImageProv;
+
+  _StampPainter(this._pasteImageProv);
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint();
+    print(size);
+    _pasteImageProv.storedImages.forEach((pasteImage) {
+      int width = pasteImage.image.width;
+      int height = pasteImage.image.height;
+      double posX = pasteImage.offset.dx;
+      double posY = pasteImage.offset.dy;
+      print(pasteImage.theta);
+      canvas.rotate(0);
+
+      var rect = Rect.fromLTRB(posX, posY, posX + 200, posY + 200);
+      Size outputSize = rect.size;
+
+      Size inputSize = Size(width.toDouble(), height.toDouble());
+      final FittedSizes fittedSizes =
+          applyBoxFit(BoxFit.cover, inputSize, outputSize);
+      final Size sourceSize = fittedSizes.source;
+      final Rect sourceRect =
+          Alignment.center.inscribe(sourceSize, Offset.zero & inputSize);
+
+      canvas.translate((posX + 200) / 2, (posY + 200) / 2);
+      canvas.rotate(pasteImage.theta);
+      canvas.translate(-(posX + 200) / 2, -(posY + 200) / 2);
+      // canvas.drawImage(pasteImage.image, pasteImage.offset, paint);
+      canvas.drawImageRect(pasteImage.image, sourceRect, rect, paint);
+    });
+  }
+
+  @override
+  bool shouldRepaint(_StampPainter oldDelegate) {
+    return false;
+  }
+}
+
+// ui.Image img = images[c];
+// final ui.Rect rect = ui.Offset.zero & new Size(200.0, 120.0);
+// final Size imageSize = new Size(330.0, 230.0);
+// FittedSizes sizes = applyBoxFit(boxfit, imageSize, new Size(100.0, 200.0));
+// final Rect inputSubrect = Alignment.center.inscribe(sizes.source, Offset.zero & imageSize);
+// final Rect outputSubrect = Alignment.center.inscribe(sizes.destination, rect);
+// canvas.drawImageRect(img, inputSubrect, outputSubrect, new Paint());
 
 class _Painter extends CustomPainter {
   final StrokesModel strokes;
