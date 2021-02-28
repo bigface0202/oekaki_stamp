@@ -42,43 +42,45 @@ class _IndexScreenState extends State<IndexScreen> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.all(10),
-        child: Column(
-          children: [
-            RaisedButton.icon(
-              icon: Icon(
-                Icons.photo_camera,
-                color: Colors.white,
+      child: Center(
+        child: Container(
+          padding: EdgeInsets.all(10),
+          child: Column(
+            children: [
+              RaisedButton.icon(
+                icon: Icon(
+                  Icons.photo_camera,
+                  color: Colors.white,
+                ),
+                color: Colors.blueAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                label: Text(
+                  'カメラ',
+                  style: TextStyle(fontSize: 20, color: Colors.white),
+                ),
+                textColor: Theme.of(context).primaryColor,
+                onPressed: _takePicture,
               ),
-              color: Colors.blueAccent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+              RaisedButton.icon(
+                icon: Icon(
+                  Icons.photo_library,
+                  color: Colors.white,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                color: Colors.blueAccent,
+                label: Text(
+                  'ギャラリー',
+                  style: TextStyle(fontSize: 20, color: Colors.white),
+                ),
+                textColor: Theme.of(context).primaryColor,
+                onPressed: () => _getImageFromGallery(context),
               ),
-              label: Text(
-                'カメラ',
-                style: TextStyle(fontSize: 20, color: Colors.white),
-              ),
-              textColor: Theme.of(context).primaryColor,
-              onPressed: _takePicture,
-            ),
-            RaisedButton.icon(
-              icon: Icon(
-                Icons.photo_library,
-                color: Colors.white,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              color: Colors.blueAccent,
-              label: Text(
-                'ギャラリー',
-                style: TextStyle(fontSize: 20, color: Colors.white),
-              ),
-              textColor: Theme.of(context).primaryColor,
-              onPressed: () => _getImageFromGallery(context),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

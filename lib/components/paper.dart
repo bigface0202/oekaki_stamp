@@ -244,12 +244,12 @@ class _StampPainter extends CustomPainter {
     _pasteImageProv.storedImages.forEach((pasteImage) {
       int width = pasteImage.image.width;
       int height = pasteImage.image.height;
-      double posX = pasteImage.offset.dx;
-      double posY = pasteImage.offset.dy;
+      double posX = pasteImage.offset.dx - 50;
+      double posY = pasteImage.offset.dy - 50;
       print(pasteImage.theta);
       canvas.rotate(0);
 
-      var rect = Rect.fromLTRB(posX, posY, posX + 200, posY + 200);
+      var rect = Rect.fromLTRB(posX, posY, posX + 100, posY + 100);
       Size outputSize = rect.size;
 
       Size inputSize = Size(width.toDouble(), height.toDouble());
@@ -259,17 +259,21 @@ class _StampPainter extends CustomPainter {
       final Rect sourceRect =
           Alignment.center.inscribe(sourceSize, Offset.zero & inputSize);
 
+      final Rect outputSubrect =
+          Alignment.center.inscribe(fittedSizes.destination, rect);
+
       canvas.translate((posX + 200) / 2, (posY + 200) / 2);
       canvas.rotate(pasteImage.theta);
       canvas.translate(-(posX + 200) / 2, -(posY + 200) / 2);
       // canvas.drawImage(pasteImage.image, pasteImage.offset, paint);
-      canvas.drawImageRect(pasteImage.image, sourceRect, rect, paint);
+      // canvas.drawImageRect(pasteImage.image, sourceRect, rect, paint);
+      canvas.drawImageRect(pasteImage.image, sourceRect, outputSubrect, paint);
     });
   }
 
   @override
   bool shouldRepaint(_StampPainter oldDelegate) {
-    return false;
+    return true;
   }
 }
 
