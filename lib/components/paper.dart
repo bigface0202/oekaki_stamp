@@ -83,15 +83,31 @@ class _PaperState extends State<Paper> {
             ),
           ),
         ),
-        FittedBox(
-          child: SizedBox(
-            width: 100,
-            height: 100,
-            child: CustomPaint(
+        // FittedBox(
+        //   child: SizedBox(
+        //     width: 100,
+        //     height: 100,
+        //     child: CustomPaint(
+        //       key: _keyPaper,
+        //       painter: _StampPainter(pasteImageProv),
+        //       child: ConstrainedBox(
+        //         constraints: BoxConstraints.expand(),
+        //       ),
+        //     ),
+        //   ),
+        // ),
+        Consumer<PasteImageModel>(
+          child: Container(),
+          builder: (context, pasteImages, ch) => FittedBox(
+            child: SizedBox(
               key: _keyPaper,
-              painter: _StampPainter(pasteImageProv),
-              child: ConstrainedBox(
-                constraints: BoxConstraints.expand(),
+              width: 100,
+              height: 100,
+              child: CustomPaint(
+                painter: _StampPainter(pasteImages.storedImages),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints.expand(),
+                ),
               ),
             ),
           ),
@@ -234,14 +250,14 @@ class _ImagePainter extends CustomPainter {
 }
 
 class _StampPainter extends CustomPainter {
-  final PasteImageModel _pasteImageProv;
+  final List _storedImages;
 
-  _StampPainter(this._pasteImageProv);
+  _StampPainter(this._storedImages);
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint();
     print(size);
-    _pasteImageProv.storedImages.forEach((pasteImage) {
+    _storedImages.forEach((pasteImage) {
       int width = pasteImage.image.width;
       int height = pasteImage.image.height;
       double posX = pasteImage.offset.dx - 50;
@@ -273,7 +289,7 @@ class _StampPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_StampPainter oldDelegate) {
-    return true;
+    return false;
   }
 }
 
