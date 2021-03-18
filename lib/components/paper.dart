@@ -75,10 +75,12 @@ class _PaperState extends State<Paper> {
           child: SizedBox(
             width: widget.image.width.toDouble(),
             height: widget.image.height.toDouble(),
-            child: CustomPaint(
-              painter: _ImagePainter(widget.image),
-              child: ConstrainedBox(
-                constraints: BoxConstraints.expand(),
+            child: RepaintBoundary(
+              child: CustomPaint(
+                painter: _ImagePainter(widget.image),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints.expand(),
+                ),
               ),
             ),
           ),
@@ -98,7 +100,7 @@ class _PaperState extends State<Paper> {
         // ),
         Consumer<PasteImageModel>(
           child: Container(),
-          builder: (context, pasteImages, ch) => FittedBox(
+          builder: (context, pasteImages, _) => FittedBox(
             child: SizedBox(
               key: _keyPaper,
               width: 100,
@@ -255,8 +257,11 @@ class _StampPainter extends CustomPainter {
   _StampPainter(this._storedImages);
   @override
   void paint(Canvas canvas, Size size) {
+    int stampNum = _storedImages.length;
+
     final paint = Paint();
-    print(size);
+    print(stampNum);
+    // forEachにすると、毎回全部のスタンプを描画することになる
     _storedImages.forEach((pasteImage) {
       int width = pasteImage.image.width;
       int height = pasteImage.image.height;
@@ -289,7 +294,7 @@ class _StampPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_StampPainter oldDelegate) {
-    return false;
+    return true;
   }
 }
 

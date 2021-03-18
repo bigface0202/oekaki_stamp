@@ -22,6 +22,8 @@ class PasteImageModel with ChangeNotifier {
   List<PasteImage> _storedImages = [];
 
   List<PasteImage> get storedImages {
+    // ...でリストの中身を全て移す
+    // ...?はnull-awareでリストがnullなら、何も渡さない
     return [..._storedImages];
   }
 
